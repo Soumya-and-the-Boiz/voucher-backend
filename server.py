@@ -9,9 +9,23 @@ from flask.ext.cors import CORS, cross_origin
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
+from random import randint
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+CITIES = [“Miltona”, “Attu Station”, “Blytheville”, “Drumright”, “Broadwater”, “Nevis”, “Alsace Manor”, “Wedowee”, “Inglis”, “Homedale”, “Lakeshore Gardens”, “Rushmere”, “West Winfield”, “Adelino”, “Farmers Loop”, “Windy Hills”, “Hebgen Lake Estates”, “Villanueva”, “Falkner”, “White Marsh”, “Ishpeming”, “Breinigsville”, “Sharonville”, “Hytop”, “Learned”, “Redington Beach”, “Adamsburg”, “Gumbranch”, “Bolindale”, “Ludlow”, “South Russell”, “Shingle Springs”, “Tariffville”, “Windsor”, “Maxville”, “Keyport”, “Fairplay”, “Westfield Center”, “Estes Park”, “Kimball”, “North East”, “Ketchum”, “New Melle”, “North Tunica”, “Madawaska”, “Hallam”, “Poplar Bluff”, “Madeira Beach”, “Shadow Lake”, “Plandome Heights”]
+
+PICTURES = [
+'http://media.cleveland.com/cleveland-heights/photo/lee-road-library-2jpg-a9f3050b56d92eb2.jpg',
+'http://www.coventryvillage.org/wordpress/wp-content/uploads/2010/12/streetsm.jpg',
+'http://d3qp2gvi46z69k.cloudfront.net/wp-content/uploads/2013/03/NeighborhoodRECON.jpg',
+'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Shaker_Heights_Public_Library.jpg/315px-Shaker_Heights_Public_Library.jpg',
+'http://blog.dentalplans.com/wp-content/uploads/2016/05/343829-neighborhood-1024x683.jpg',
+'http://www.howardhanna.com/ClientImage/Office-Full/0028.jpg',
+'http://www.seechicagorealestate.com/uploads/agent-1/Chicago-Neighborhoods.jpg',
+]
 
 CONNECTIVITY_INDEX = 0
 EDUCATION_INDEX = 1
@@ -83,11 +97,27 @@ def hello_world():
     tracts = []
     for item in request.json:
         tracts.append(get_tract(float(item['lat']), float(item['lng'])))
-    candidates = predict_rank(tracts)[:5]
+    candidates = predict(tracts)[:5]
 
     return jsonify(create_response(candidates))
 
-def create_response(canidiates)
+def create_response(candidates):
+    info_list = []
+    rank_dict = get_ranks(candidates)
+    for candidate in candidates:
+        info_list.append({
+            'tract' : {
+                'name': CITIES[randint(0,59)],
+                'center_lat': '41.430186500000005',
+                'center_lng': '-81.9423575',
+                'bounding_rect': [(41.412017, -81.962253), (41.411047, -81.962464), (41.411047, -81.959963), (41.413747, -81.959663), (41.413746, -81.946265), (41.418545, -81.945772), (41.418644, -81.942675), (41.426242, -81.942786), (41.426333, -81.940909), (41.426533, -81.939027), (41.428869, -81.935968), (41.428969, -81.932928), (41.430649, -81.932734), (41.43409, -81.932598), (41.433946, -81.92276), (41.439678, -81.922546), (41.449326, -81.922251), (41.446892, -81.928762), (41.445626, -81.930717), (41.443356, -81.933713), (41.440287, -81.936656), (41.437993, -81.938757), (41.432612, -81.94369), (41.427126, -81.950021), (41.424516, -81.955868), (41.42268, -81.961831), (41.412017, -81.962253)],
+                'img_src': PICTURES[randint(0,6)],
+                'education_rank': rank_dict[candidate][EDUCATION_INDEX],
+                'transportation_rank': rank_dict[candidate][TRANSPORTATION_INDEX],
+                'wellness_rank': rank_dict[candidate][WELLNESS_INDEX],
+                'connectivity_rank': rank_dict[candidate][CONNECTIVITY_INDEX],
+            }
+        }
 
 
 def get_tract(lat, lng):
@@ -112,7 +142,4 @@ def get_tract(lat, lng):
     return None
 
 if __name__ == "__main__":
-
-
-
     app.run()
