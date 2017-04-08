@@ -11,11 +11,14 @@ from shapely.geometry import Point
 
 from random import randint
 
+tract_data_coords = {}
+tract_data_housing = {}
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-CITIES = [“Miltona”, “Attu Station”, “Blytheville”, “Drumright”, “Broadwater”, “Nevis”, “Alsace Manor”, “Wedowee”, “Inglis”, “Homedale”, “Lakeshore Gardens”, “Rushmere”, “West Winfield”, “Adelino”, “Farmers Loop”, “Windy Hills”, “Hebgen Lake Estates”, “Villanueva”, “Falkner”, “White Marsh”, “Ishpeming”, “Breinigsville”, “Sharonville”, “Hytop”, “Learned”, “Redington Beach”, “Adamsburg”, “Gumbranch”, “Bolindale”, “Ludlow”, “South Russell”, “Shingle Springs”, “Tariffville”, “Windsor”, “Maxville”, “Keyport”, “Fairplay”, “Westfield Center”, “Estes Park”, “Kimball”, “North East”, “Ketchum”, “New Melle”, “North Tunica”, “Madawaska”, “Hallam”, “Poplar Bluff”, “Madeira Beach”, “Shadow Lake”, “Plandome Heights”]
+CITIES = ['Miltona', 'Attu Station', 'Blytheville', 'Drumright', 'Broadwater', 'Nevis', 'Alsace Manor', 'Wedowee', 'Inglis', 'Homedale', 'Lakeshore Gardens', 'Rushmere', 'West Winfield', 'Adelino', 'Farmers Loop', 'Windy Hills', 'Hebgen Lake Estates', 'Villanueva', 'Falkner', 'White Marsh', 'Ishpeming', 'Breinigsville', 'Sharonville', 'Hytop', 'Learned', 'Redington Beach', 'Adamsburg', 'Gumbranch', 'Bolindale', 'Ludlow', 'South Russell', 'Shingle Springs', 'Tariffville', 'Windsor', 'Maxville', 'Keyport', 'Fairplay', 'Westfield Center', 'Estes Park', 'Kimball', 'North East', 'Ketchum', 'New Melle', 'North Tunica', 'Madawaska', 'Hallam', 'Poplar Bluff', 'Madeira Beach', 'Shadow Lake', 'Plandome Heights']
 
 PICTURES = [
 'http://media.cleveland.com/cleveland-heights/photo/lee-road-library-2jpg-a9f3050b56d92eb2.jpg',
@@ -104,21 +107,22 @@ def hello_world():
 def create_response(candidates):
     info_list = []
     rank_dict = get_ranks(candidates)
+    print(rank_dict)
     for candidate in candidates:
         info_list.append({
             'tract' : {
-                'name': CITIES[randint(0,59)],
-                'center_lat': '41.430186500000005',
-                'center_lng': '-81.9423575',
-                'bounding_rect': [(41.412017, -81.962253), (41.411047, -81.962464), (41.411047, -81.959963), (41.413747, -81.959663), (41.413746, -81.946265), (41.418545, -81.945772), (41.418644, -81.942675), (41.426242, -81.942786), (41.426333, -81.940909), (41.426533, -81.939027), (41.428869, -81.935968), (41.428969, -81.932928), (41.430649, -81.932734), (41.43409, -81.932598), (41.433946, -81.92276), (41.439678, -81.922546), (41.449326, -81.922251), (41.446892, -81.928762), (41.445626, -81.930717), (41.443356, -81.933713), (41.440287, -81.936656), (41.437993, -81.938757), (41.432612, -81.94369), (41.427126, -81.950021), (41.424516, -81.955868), (41.42268, -81.961831), (41.412017, -81.962253)],
+                'name': CITIES[randint(0,49)],
+                'center_lat': tract_data_coords[candidate][1],
+                'center_lng': tract_data_coords[candidate][2],
+                'bounding_rect': tract_data_coords[candidate][3],
                 'img_src': PICTURES[randint(0,6)],
-                'education_rank': rank_dict[candidate][EDUCATION_INDEX],
-                'transportation_rank': rank_dict[candidate][TRANSPORTATION_INDEX],
-                'wellness_rank': rank_dict[candidate][WELLNESS_INDEX],
-                'connectivity_rank': rank_dict[candidate][CONNECTIVITY_INDEX],
+                'education_rank': rank_dict[str(candidate)][EDUCATION_INDEX],
+                'transportation_rank': rank_dict[str(candidate)][TRANSPORTATION_INDEX],
+                'wellness_rank': rank_dict[str(candidate)][WELLNESS_INDEX],
+                'connectivity_rank': rank_dict[str(candidate)][CONNECTIVITY_INDEX],
             }
-        }
-
+        })
+    return info_list
 
 def get_tract(lat, lng):
     xy_point = Point(lat,lng)
@@ -141,5 +145,15 @@ def get_tract(lat, lng):
 
     return None
 
+def set_tract_data():
+    _hvc = pd.read_csv('tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv')
+    #_rent = pd.read_csv('tract_latlong_HVC/RentalCostsInformation(ACS2012_5-year)_Cuyohoga County.csv')
+
+    for index, row in _hvc.iterrows():
+        t = row['tract_id']
+        tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord']]
+        tract_data_housing[t] = [row['tract_id'], row['HCV_PUBLIC']]
+
 if __name__ == "__main__":
+    set_tract_data()
     app.run()
