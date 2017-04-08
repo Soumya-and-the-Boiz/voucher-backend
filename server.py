@@ -107,14 +107,13 @@ def hello_world():
 def create_response(candidates):
     info_list = []
     rank_dict = get_ranks(candidates)
-    print(rank_dict)
     for candidate in candidates:
         info_list.append({
             'tract' : {
                 'name': CITIES[randint(0,49)],
                 'center_lat': tract_data_coords[candidate][1],
                 'center_lng': tract_data_coords[candidate][2],
-                'bounding_rect': tract_data_coords[candidate][3],
+                'bounding_rect': tract_data_coords[candidate][3].replace('(', '[').replace(')',']'),
                 'img_src': PICTURES[randint(0,6)],
                 'education_rank': rank_dict[str(candidate)][EDUCATION_INDEX],
                 'transportation_rank': rank_dict[str(candidate)][TRANSPORTATION_INDEX],
