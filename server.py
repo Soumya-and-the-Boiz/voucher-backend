@@ -9,6 +9,9 @@ from flask.ext.cors import CORS, cross_origin
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
+tract_data_coords = {}
+tract_data_housing = {}
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -111,8 +114,16 @@ def get_tract(lat, lng):
 
     return None
 
+def set_tract_data():
+    _hvc = pd.read_csv('tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv')
+    #_rent = pd.read_csv('tract_latlong_HVC/RentalCostsInformation(ACS2012_5-year)_Cuyohoga County.csv')
+    
+    for index, row in _hvc.iterrows():
+        t = row['tract_id']
+        tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord']]
+        tract_data_housing[t] = [row['tract_id'], row['HCV_PUBLIC']]
+
 if __name__ == "__main__":
 
-
-
+	set_tract_data()
     app.run()
