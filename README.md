@@ -5,6 +5,6 @@ Make sure you `pip3 install flask`
 
 Then 
 ```
-export FLASK_APP=hello.py
+export FLASK_APP=server.py
 flask run
 ```
