@@ -100,6 +100,8 @@ def hello_world():
     tracts = []
     for item in request.json:
         tracts.append(get_tract(float(item['lat']), float(item['lng'])))
+    if len(tracts) == 0:
+        return jsonify([])
     candidates = predict(tracts)[:5]
 
     return jsonify(create_response(candidates))
