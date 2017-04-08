@@ -1,6 +1,13 @@
+
 import requests
+import pandas as pd
+
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS, cross_origin
+
+from shapely.geometry import Polygon
+from shapely.geometry import Point
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -68,6 +75,30 @@ def hello_world():
     for tract in tracts:
         output += tract + '\n'
     return output
+
+
+
+def get_tract(lat, long):
+    xy_point = Point(lat,long)
+    
+    cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
+    #_ = cuyahoga_tract_data[['tract_id','center_latitude','center_longitude','polygon_coord']]
+
+    for index, row in cuyahoga_tract_data.iterrows():        
+        _ = row['polygon_coord'][1:-1]
+        l_str = _.replace('(','').replace(' ','')
+        _latlong = l_str.split('),')
+        ll  = []
+        for pair in _latlong:
+            pair = pair.replace(')', '')
+            separator = pair.find(',')
+            ll.append((float(pair[:separator]), float(pair[separator+1:])))
+            
+        polygon = Polygon(ll)
+        if polygon.contains(xy_point):
+            return row['tract_id']
+        
+        return None
 
 if __name__ == "__main__":
     app.run()
