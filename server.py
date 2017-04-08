@@ -1,6 +1,7 @@
 
 import requests
 import pandas as pd
+from predict_rank import *
 
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS, cross_origin
@@ -11,6 +12,11 @@ from shapely.geometry import Point
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+CONNECTIVITY_INDEX = 0
+EDUCATION_INDEX = 1
+TRANSPORTATION_INDEX = 2
+WELLNESS_INDEX = 3
 
 MOCKED_RESPONSE = [
     {'tract' : {
@@ -77,9 +83,11 @@ def hello_world():
     tracts = []
     for item in request.json:
         tracts.append(get_tract(float(item['lat']), float(item['lng'])))
-    print(tracts)
-    return jsonify(MOCKED_RESPONSE)
+    candidates = predict_rank(tracts)[:5]
 
+    return jsonify(create_response(candidates))
+
+def create_response(canidiates)
 
 
 def get_tract(lat, lng):
@@ -104,4 +112,7 @@ def get_tract(lat, lng):
     return None
 
 if __name__ == "__main__":
+
+
+
     app.run()
