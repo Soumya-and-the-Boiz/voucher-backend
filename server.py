@@ -29,7 +29,6 @@ PICTURES = [
 'http://www.howardhanna.com/ClientImage/Office-Full/0028.jpg',
 'http://www.seechicagorealestate.com/uploads/agent-1/Chicago-Neighborhoods.jpg',
 'http://0.tqn.com/d/cleveland/1/S/3/d/-/-/collinwood2-spivack.jpg',
-'http://pics4.city-data.com/cpicc/cfiles272.jpg',
 'http://image.cleveland.com/home/cleve-media/width960/img/plain-dealer/photo/2016/07/15/-63b196e7e586620f.jpg',
 'http://www.pittsburghcityliving.com/img/heroes/203J4387-%20Lawrenceville%20streetscape.jpg',
 'http://mypittsburghneighborhood.com/wp-content/uploads/2016/12/MtLebanon.jpg',
