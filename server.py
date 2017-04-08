@@ -12,8 +12,6 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-QUERY_TEMPLATE = 'http://data.fcc.gov/api/block/2010/find?format=json&latitude={}&longitude=}{}'
-
 MOCKED_RESPONSE = [
     {'tract' : {
         'name': 'Tract 1',
@@ -76,26 +74,20 @@ MOCKED_RESPONSE = [
 @app.route('/', methods=['POST'])
 @cross_origin()
 def hello_world():
-    print(request.json)
+    tracts = []
+    for item in request.json:
+        tracts.append(get_tract(float(item['lat']), float(item['lng'])))
+    print(tracts)
     return jsonify(MOCKED_RESPONSE)
 
-    tracts = []
-    for location in locations:
-        tracts.append(get_tract(location['lat'], location['lng']))
-    output = ''
-    for tract in tracts:
-        output += tract + '\n'
-    return output
 
 
+def get_tract(lat, lng):
+    xy_point = Point(lat,lng)
 
-def get_tract(lat, long):
-    xy_point = Point(lat,long)
-    
     cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
-    #_ = cuyahoga_tract_data[['tract_id','center_latitude','center_longitude','polygon_coord']]
 
-    for index, row in cuyahoga_tract_data.iterrows():        
+    for index, row in cuyahoga_tract_data.iterrows():
         _ = row['polygon_coord'][1:-1]
         l_str = _.replace('(','').replace(' ','')
         _latlong = l_str.split('),')
@@ -104,12 +96,12 @@ def get_tract(lat, long):
             pair = pair.replace(')', '')
             separator = pair.find(',')
             ll.append((float(pair[:separator]), float(pair[separator+1:])))
-            
+
         polygon = Polygon(ll)
         if polygon.contains(xy_point):
             return row['tract_id']
-        
-        return None
+
+    return None
 
 if __name__ == "__main__":
     app.run()
