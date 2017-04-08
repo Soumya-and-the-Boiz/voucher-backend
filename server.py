@@ -1,6 +1,9 @@
 import requests
 from flask import Flask, request, jsonify
+from flask.ext.cors import CORS, cross_origin
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 QUERY_TEMPLATE = 'http://data.fcc.gov/api/block/2010/find?format=json&latitude={}&longitude=}{}'
 
@@ -34,6 +37,7 @@ MOCKED_RESPONSE = [
 
 
 @app.route('/', methods=['GET'])
+@cross_origin()
 def hello_world():
     return jsonify(MOCKED_RESPONSE)
     locations = request.json['locations']
@@ -44,3 +48,6 @@ def hello_world():
     for tract in tracts:
         output += tract + '\n'
     return output
+
+if __name__ == "__main__":
+    app.run()
