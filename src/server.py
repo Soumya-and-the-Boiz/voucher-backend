@@ -1,7 +1,6 @@
-
 import requests
 import pandas as pd
-from predict_rank import *
+from ranking.predict_rank import *
 
 from flask import Flask, request, jsonify
 from flask.ext.cors import CORS, cross_origin
@@ -127,10 +126,10 @@ def create_response(candidates):
                 'center_lng': tract_data_coords[candidate][2],
                 'bounding_rect': tract_data_coords[candidate][3].replace('(', '[').replace(')',']'),
                 'img_src': PICTURES[randint(0,16)],
-                'education_rank': rank_dict[str(candidate)][EDUCATION_INDEX],
-                'transportation_rank': rank_dict[str(candidate)][TRANSPORTATION_INDEX],
-                'wellness_rank': rank_dict[str(candidate)][WELLNESS_INDEX],
-                'connectivity_rank': rank_dict[str(candidate)][CONNECTIVITY_INDEX],
+                'education_rank': int(rank_dict[str(candidate)][EDUCATION_INDEX]),
+                'transportation_rank': int(rank_dict[str(candidate)][TRANSPORTATION_INDEX]),
+                'wellness_rank': int(rank_dict[str(candidate)][WELLNESS_INDEX]),
+                'connectivity_rank': int(rank_dict[str(candidate)][CONNECTIVITY_INDEX]),
             }
         })
     return info_list
