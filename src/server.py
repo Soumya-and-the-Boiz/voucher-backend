@@ -1,9 +1,14 @@
 import requests
 import pandas as pd
-from ranking.predict_rank import *
+
+import importlib
+ranking_spec = importlib.util.find_spec('ranking.predict_rank')
+found = ranking_spec is not None
+if found:
+    from ranking.predict_rank import *
 
 from flask import Flask, request, jsonify
-from flask.ext.cors import CORS, cross_origin
+from flask_cors import CORS, cross_origin
 
 from shapely.geometry import Polygon
 from shapely.geometry import Point
