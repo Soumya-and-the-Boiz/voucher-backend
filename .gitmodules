@@ -1,0 +1,3 @@
+[submodule "src/ranking"]
+	path = src/ranking
+	url = https://github.com/daver84ever/ranking.git
