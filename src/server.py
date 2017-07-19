@@ -17,7 +17,7 @@ from random import randint, choice
 
 tract_data_coords = {}
 tract_data_housing = {}
-cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
+tract_bounds = {}
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -36,13 +36,12 @@ PICTURES = [
 'http://0.tqn.com/d/cleveland/1/S/3/d/-/-/collinwood2-spivack.jpg',
 'http://image.cleveland.com/home/cleve-media/width960/img/plain-dealer/photo/2016/07/15/-63b196e7e586620f.jpg',
 'http://www.pittsburghcityliving.com/img/heroes/203J4387-%20Lawrenceville%20streetscape.jpg',
-'http://mypittsburghneighborhood.com/wp-content/uploads/2016/12/MtLebanon.jpg',
 'http://snipesproperties.com/wp-content/uploads/2014/03/church-hill.jpg',
 'http://www.dreamtown.com/photos/tiles/neighborhoods/IrvingPark.jpg',
 'https://s3.amazonaws.com/citybuzz/2015/11/ukrainian-village-chicago-neighborhood/ukrainian-village-1.jpg',
 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/SD_Houses_2.jpg/300px-SD_Houses_2.jpg',
 'https://upload.wikimedia.org/wikipedia/en/c/c3/UD_Ghetto_Irving.jpg',
-'http://livability.com/sites/default/files/7730312BM7935_1.jpg'
+'http://livability.com/sites/default/files/7730312BM7935_1.jpg',
 ]
 
 CONNECTIVITY_INDEX = 0
@@ -74,7 +73,7 @@ def create_mocked_response():
                 'center_lat': tract_info[1],
                 'center_lng': tract_info[2],
                 'bounding_rect': tract_info[3].replace('(', '[').replace(')',']'),
-                'img_src': PICTURES[randint(0,16)],
+                'img_src': PICTURES[randint(0,15)],
                 'education_rank': randint(0,300),
                 'transportation_rank': randint(0,300),
                 'wellness_rank': randint(0,300),
@@ -93,7 +92,7 @@ def create_response(candidates):
                 'center_lat': tract_data_coords[candidate][1],
                 'center_lng': tract_data_coords[candidate][2],
                 'bounding_rect': tract_data_coords[candidate][3].replace('(', '[').replace(')',']'),
-                'img_src': PICTURES[randint(0,16)],
+                'img_src': PICTURES[randint(0,15)],
                 'education_rank': int(rank_dict[str(candidate)][EDUCATION_INDEX]),
                 'transportation_rank': int(rank_dict[str(candidate)][TRANSPORTATION_INDEX]),
                 'wellness_rank': int(rank_dict[str(candidate)][WELLNESS_INDEX]),
@@ -105,19 +104,9 @@ def create_response(candidates):
 def get_tract(lat, lng):
     xy_point = Point(lat,lng)
 
-    for index, row in cuyahoga_tract_data.iterrows():
-        _ = row['polygon_coord'][1:-1]
-        l_str = _.replace('(','').replace(' ','')
-        _latlong = l_str.split('),')
-        ll  = []
-        for pair in _latlong:
-            pair = pair.replace(')', '')
-            separator = pair.find(',')
-            ll.append((float(pair[:separator]), float(pair[separator+1:])))
-
-        polygon = Polygon(ll)
-        if polygon.contains(xy_point):
-            return row['tract_id']
+    for tract_id, bounds in tract_bounds.items():
+        if bounds.contains(xy_point):
+            return tract_id
 
     return None
 
@@ -129,6 +118,13 @@ def set_tract_data():
         t = row['tract_id']
         tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord']]
         tract_data_housing[t] = [row['tract_id'], row['HCV_PUBLIC']]
+
+    cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
+
+    # If performance at startup becomes a concern, this should be reverted
+    # to the original method of teasing apart the string.
+    for index, row in cuyahoga_tract_data.iterrows():
+        tract_bounds[row['tract_id']] = Polygon(eval(row['polygon_coord']))
 
 if __name__ == "__main__":
     set_tract_data()
