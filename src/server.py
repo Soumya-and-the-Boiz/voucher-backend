@@ -1,4 +1,5 @@
 import requests
+from itertools import islice
 import pandas as pd
 
 import importlib
@@ -18,6 +19,8 @@ from random import randint, choice
 tract_data_coords = {}
 tract_data_housing = {}
 tract_bounds = {}
+
+NUMBER_OF_RESULTS = 5
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -53,13 +56,15 @@ WELLNESS_INDEX = 3
 @cross_origin()
 def hello_world():
     if has_ranking:
-        tracts = []
-        for item in request.json:
-            tracts.append(get_tract(float(item['lat']), float(item['lng'])))
-        if len(tracts) == 0:
+        selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json]
+        if selected_tracts:
+            filter_func = lambda tract: not tract in selected_tracts
+            predicted_tracts = predict(selected_tracts)
+            max_results_needed = NUMBER_OF_RESULTS + len(selected_tracts)
+            candidates = list(islice(filter(filter_func, predicted_tracts[:max_results_needed]), NUMBER_OF_RESULTS))
+            return jsonify(create_response(candidates))
+        else:
             return jsonify([])
-        candidates = predict(tracts)[:5]
-        return jsonify(create_response(candidates))
     else:
         return jsonify(create_mocked_response())
 
@@ -103,11 +108,9 @@ def create_response(candidates):
 
 def get_tract(lat, lng):
     xy_point = Point(lat,lng)
-
     for tract_id, bounds in tract_bounds.items():
         if bounds.contains(xy_point):
             return tract_id
-
     return None
 
 def set_tract_data():
