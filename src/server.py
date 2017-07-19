@@ -17,6 +17,7 @@ from random import randint, choice
 
 tract_data_coords = {}
 tract_data_housing = {}
+cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -59,7 +60,6 @@ def hello_world():
         if len(tracts) == 0:
             return jsonify([])
         candidates = predict(tracts)[:5]
-        print(create_response(candidates))
         return jsonify(create_response(candidates))
     else:
         return jsonify(create_mocked_response())
@@ -104,8 +104,6 @@ def create_response(candidates):
 
 def get_tract(lat, lng):
     xy_point = Point(lat,lng)
-
-    cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
 
     for index, row in cuyahoga_tract_data.iterrows():
         _ = row['polygon_coord'][1:-1]
