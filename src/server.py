@@ -70,11 +70,11 @@ def hello_world():
 
 def create_mocked_response():
     info_list = []
-    for _ in range(0,5):
+    for i in range(0,5):
         tract_info = choice(list(tract_data_coords.values()))
         info_list.append({
             'tract' : {
-                'name': CITIES[randint(0,49)],
+                'tract_id': i,
                 'center_lat': tract_info[1],
                 'center_lng': tract_info[2],
                 'bounding_rect': tract_info[3].replace('(', '[').replace(')',']'),
@@ -93,7 +93,7 @@ def create_response(candidates):
     for candidate in candidates:
         info_list.append({
             'tract' : {
-                'name': CITIES[randint(0,49)],
+                'tract_id': candidate,
                 'center_lat': tract_data_coords[candidate][1],
                 'center_lng': tract_data_coords[candidate][2],
                 'bounding_rect': tract_data_coords[candidate][3].replace('(', '[').replace(')',']'),
