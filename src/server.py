@@ -17,7 +17,6 @@ from shapely.geometry import Point
 from random import randint, choice
 
 tract_data_coords = {}
-tract_data_housing = {}
 tract_bounds = {}
 
 NUMBER_OF_RESULTS = 5
@@ -74,6 +73,7 @@ def create_mocked_response():
         tract_info = choice(list(tract_data_coords.values()))
         info_list.append({
             'tract' : {
+                'name': tract_data_coords[candidate][4],
                 'center_lat': tract_info[1],
                 'center_lng': tract_info[2],
                 'bounding_rect': tract_info[3].replace('(', '[').replace(')',']'),
@@ -92,6 +92,7 @@ def create_response(candidates):
     for candidate in candidates:
         info_list.append({
             'tract' : {
+                'name': tract_data_coords[candidate][4],
                 'center_lat': tract_data_coords[candidate][1],
                 'center_lng': tract_data_coords[candidate][2],
                 'bounding_rect': tract_data_coords[candidate][3].replace('(', '[').replace(')',']'),
@@ -112,13 +113,11 @@ def get_tract(lat, lng):
     return None
 
 def set_tract_data():
-    _hvc = pd.read_csv('tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv')
-    #_rent = pd.read_csv('tract_latlong_HVC/RentalCostsInformation(ACS2012_5-year)_Cuyohoga County.csv')
+    hvc = pd.read_csv('tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv')
 
-    for index, row in _hvc.iterrows():
+    for index, row in hvc.iterrows():
         t = row['tract_id']
-        tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord']]
-        tract_data_housing[t] = [row['tract_id'], row['HCV_PUBLIC']]
+        tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord'], row['name']]
 
     cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
 
