@@ -1,4 +1,3 @@
-import requests
 from itertools import islice
 import pandas as pd
 
