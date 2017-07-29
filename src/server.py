@@ -73,7 +73,8 @@ def create_mocked_response():
         tract_info = choice(list(tract_data_coords.values()))
         info_list.append({
             'tract' : {
-                'name': tract_data_coords[candidate][4],
+                'tract_id': tract_info[0],
+                'name': tract_info[4],
                 'center_lat': tract_info[1],
                 'center_lng': tract_info[2],
                 'bounding_rect': tract_info[3].replace('(', '[').replace(')',']'),
@@ -92,6 +93,7 @@ def create_response(candidates):
     for candidate in candidates:
         info_list.append({
             'tract' : {
+                'tract_id': candidate,
                 'name': tract_data_coords[candidate][4],
                 'center_lat': tract_data_coords[candidate][1],
                 'center_lng': tract_data_coords[candidate][2],
