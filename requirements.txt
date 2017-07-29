@@ -11,7 +11,6 @@ pandas==0.19.2
 pyparsing==2.2.0
 python-dateutil==2.6.0
 pytz==2017.2
-requests==2.13.0
-Shapely==1.5.17.post1
+Shapely==1.5.17
 six==1.10.0
 Werkzeug==0.12.1
