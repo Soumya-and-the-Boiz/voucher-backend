@@ -2,6 +2,8 @@ from itertools import islice
 import pandas as pd
 import os
 
+import datetime
+
 import importlib
 ranking_spec = importlib.util.find_spec('ranking')
 has_ranking = ranking_spec is not None
@@ -56,6 +58,11 @@ WELLNESS_INDEX = 3
 def hello_world():
     if has_ranking:
         selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json]
+        selected_tracts = list(filter(None.__ne__, selected_tracts))
+        print('\t'.join(map(str, [datetime.datetime.utcnow(),
+                                  request.remote_addr,
+                                  selected_tracts
+                                 ])))
         if selected_tracts:
             filter_func = lambda tract: not tract in selected_tracts
             predicted_tracts = predict(selected_tracts)
@@ -132,5 +139,5 @@ if __name__ == "__main__":
     set_tract_data()
     app.run(
       host=os.getenv('LISTEN', '0.0.0.0'),
-      port=int(os.getenv('PORT', '5000'))
+      port=int(os.getenv('PORT', '5000')),
     )
