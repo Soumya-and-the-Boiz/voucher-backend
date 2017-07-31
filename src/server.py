@@ -85,7 +85,7 @@ def create_mocked_response():
                 'center_lat': tract_info[1],
                 'center_lng': tract_info[2],
                 'bounding_rect': tract_info[3].replace('(', '[').replace(')',']'),
-                'img_src': PICTURES[randint(0,15)],
+                'img_src': tract_info[5],
                 'education_rank': randint(0,300),
                 'transportation_rank': randint(0,300),
                 'wellness_rank': randint(0,300),
@@ -105,7 +105,7 @@ def create_response(candidates):
                 'center_lat': tract_data_coords[candidate][1],
                 'center_lng': tract_data_coords[candidate][2],
                 'bounding_rect': tract_data_coords[candidate][3].replace('(', '[').replace(')',']'),
-                'img_src': PICTURES[randint(0,15)],
+                'img_src': tract_data_coords[candidate][5],
                 'education_rank': int(rank_dict[str(candidate)][EDUCATION_INDEX]),
                 'transportation_rank': int(rank_dict[str(candidate)][TRANSPORTATION_INDEX]),
                 'wellness_rank': int(rank_dict[str(candidate)][WELLNESS_INDEX]),
@@ -126,7 +126,7 @@ def set_tract_data():
 
     for index, row in hvc.iterrows():
         t = row['tract_id']
-        tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord'], row['name']]
+        tract_data_coords[t] = [row['tract_id'], row['center_latitude'], row['center_longitude'], row['polygon_coord'], row['name'], row['img_src']]
 
     cuyahoga_tract_data = pd.read_csv("tract_latlong_HVC/cuyahoga_tract_lat_long_hcv.csv")
 
