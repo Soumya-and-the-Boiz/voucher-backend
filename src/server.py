@@ -27,27 +27,6 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-CITIES = ['Miltona', 'Attu Station', 'Blytheville', 'Drumright', 'Broadwater', 'Nevis', 'Alsace Manor', 'Wedowee', 'Inglis', 'Homedale', 'Lakeshore Gardens', 'Rushmere', 'West Winfield', 'Adelino', 'Farmers Loop', 'Windy Hills', 'Hebgen Lake Estates', 'Villanueva', 'Falkner', 'White Marsh', 'Ishpeming', 'Breinigsville', 'Sharonville', 'Hytop', 'Learned', 'Redington Beach', 'Adamsburg', 'Gumbranch', 'Bolindale', 'Ludlow', 'South Russell', 'Shingle Springs', 'Tariffville', 'Windsor', 'Maxville', 'Keyport', 'Fairplay', 'Westfield Center', 'Estes Park', 'Kimball', 'North East', 'Ketchum', 'New Melle', 'North Tunica', 'Madawaska', 'Hallam', 'Poplar Bluff', 'Madeira Beach', 'Shadow Lake', 'Plandome Heights']
-
-PICTURES = [
-'http://media.cleveland.com/cleveland-heights/photo/lee-road-library-2jpg-a9f3050b56d92eb2.jpg',
-'http://www.coventryvillage.org/wordpress/wp-content/uploads/2010/12/streetsm.jpg',
-'http://d3qp2gvi46z69k.cloudfront.net/wp-content/uploads/2013/03/NeighborhoodRECON.jpg',
-'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Shaker_Heights_Public_Library.jpg/315px-Shaker_Heights_Public_Library.jpg',
-'http://blog.dentalplans.com/wp-content/uploads/2016/05/343829-neighborhood-1024x683.jpg',
-'http://www.howardhanna.com/ClientImage/Office-Full/0028.jpg',
-'http://www.seechicagorealestate.com/uploads/agent-1/Chicago-Neighborhoods.jpg',
-'http://0.tqn.com/d/cleveland/1/S/3/d/-/-/collinwood2-spivack.jpg',
-'http://image.cleveland.com/home/cleve-media/width960/img/plain-dealer/photo/2016/07/15/-63b196e7e586620f.jpg',
-'http://www.pittsburghcityliving.com/img/heroes/203J4387-%20Lawrenceville%20streetscape.jpg',
-'http://snipesproperties.com/wp-content/uploads/2014/03/church-hill.jpg',
-'http://www.dreamtown.com/photos/tiles/neighborhoods/IrvingPark.jpg',
-'https://s3.amazonaws.com/citybuzz/2015/11/ukrainian-village-chicago-neighborhood/ukrainian-village-1.jpg',
-'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/SD_Houses_2.jpg/300px-SD_Houses_2.jpg',
-'https://upload.wikimedia.org/wikipedia/en/c/c3/UD_Ghetto_Irving.jpg',
-'http://livability.com/sites/default/files/7730312BM7935_1.jpg',
-]
-
 CONNECTIVITY_INDEX = 0
 EDUCATION_INDEX = 1
 TRANSPORTATION_INDEX = 2
