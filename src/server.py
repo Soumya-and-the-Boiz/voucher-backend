@@ -13,6 +13,10 @@ if has_ranking:
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
+
+import logging
+from logging.handlers import RotatingFileHandler
+
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 
@@ -36,7 +40,7 @@ WELLNESS_INDEX = 3
 @cross_origin()
 def hello_world():
     if has_ranking:
-        selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json]
+        selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in process_request(request.json)]
         selected_tracts = list(filter(None.__ne__, selected_tracts))
         print('\t'.join(map(str, [datetime.datetime.utcnow(),
                                   request.remote_addr,
@@ -52,6 +56,18 @@ def hello_world():
             return jsonify([])
     else:
         return jsonify(create_mocked_response())
+
+def process_request(request):
+    tracts = request['oldMarkers']
+    changedMarker = request['changedMarker']
+    if request['operation'] == "add":
+        tracts.append(changedMarker)
+    elif request['operation'] == "remove":
+        tracts = [tract for tract in tracts if tract['lat'] != changedMarker['lat'] and tract['lng'] != changedMarker['lng']]
+    else:
+        raise AssertionError('Request operation invalid, should be add or remove')
+    print(tracts)
+    return tracts
 
 def create_mocked_response():
     info_list = []
@@ -115,6 +131,9 @@ def set_tract_data():
         tract_bounds[row['tract_id']] = Polygon(eval(row['polygon_coord']))
 
 if __name__ == "__main__":
+    handler = RotatingFileHandler('backend.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.INFO)
+    app.logger.addHandler(handler)
     set_tract_data()
     app.run(
       host=os.getenv('LISTEN', '0.0.0.0'),

@@ -94,3 +94,6 @@ ENV/
 
 # Mac stuff
 .DS_Store
+
+# Log Files
+backend.log.*
