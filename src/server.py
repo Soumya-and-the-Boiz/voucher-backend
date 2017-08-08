@@ -134,9 +134,6 @@ def set_tract_data():
         tract_bounds[row['tract_id']] = Polygon(eval(row['polygon_coord']))
 
 if __name__ == "__main__":
-    handler = RotatingFileHandler('backend.log', maxBytes=10000, backupCount=1)
-    handler.setLevel(logging.INFO)
-    app.logger.addHandler(handler)
     set_tract_data()
     app.run(
       host=os.getenv('LISTEN', '0.0.0.0'),
