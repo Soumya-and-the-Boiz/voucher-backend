@@ -2,8 +2,7 @@ from itertools import islice
 import pandas as pd
 import os
 import json
-
-import datetime
+import datetime, time
 
 import importlib
 ranking_spec = importlib.util.find_spec('ranking')
@@ -14,9 +13,7 @@ if has_ranking:
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
-
-import logging
-from logging.handlers import RotatingFileHandler
+import boto3
 
 from shapely.geometry import Polygon
 from shapely.geometry import Point
@@ -28,12 +25,25 @@ tract_bounds = {}
 
 NUMBER_OF_RESULTS = 5
 
+with open('src/config.json', 'r') as fp :
+    config = json.load(fp)
+
+logging_client = boto3.client('logs', region_name='us-west-2', aws_access_key_id=config['CLOUDWATCHACCESS'], aws_secret_access_key=config['CLOUDWATCHSECRET'])
+
+today = datetime.date.today()
+logging_week = today - datetime.timedelta(today.weekday());
+log_stream_info = logging_client.describe_log_streams(logGroupName='LikelyHoods', logStreamNamePrefix=logging_week.strftime('%m/%d/%Y'))['logStreams']
+log_sequence_token = None
+
+if not log_stream_info:
+    logging_client.create_log_stream(logGroupName='LikelyHoods', logStreamName=logging_week.strftime('%m/%d/%Y'))
+else:
+    if 'uploadSequenceToken' in log_stream_info[0]:
+        log_sequence_token = log_stream_info[0]['uploadSequenceToken']
+
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-
-with open('src/config.json', 'r') as fp :
-    config = json.load(fp)
 
 CONNECTIVITY_INDEX = 0
 EDUCATION_INDEX = 1
@@ -44,9 +54,9 @@ WELLNESS_INDEX = 3
 @cross_origin()
 def hello_world():
     if has_ranking:
-        log_request(request.json)
         selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json['markers']]
         selected_tracts = list(filter(None.__ne__, selected_tracts))
+        log_request(request.json, selected_tracts)
         print('\t'.join(map(str, [datetime.datetime.utcnow(),
                                   request.remote_addr,
                                   selected_tracts
@@ -62,15 +72,38 @@ def hello_world():
     else:
         return jsonify(create_mocked_response())
 
-def log_request(request):
+def log_request(request, selected_tracts):
+    global log_sequence_token
+    log_stream = find_or_create_logstream()
     tracts = request['markers']
-    changedMarker = request['changedMarker']
-    if request['operation'] == "add":
-        print('Add request logged')
-    elif request['operation'] == "remove":
-        print('Remove request logged')
-    else:
-        print('Unknown request logged, expected add or remove')
+    changedTract = get_tract(float(request['changedMarker']['lat']), float(request['changedMarker']['lng']))
+    log_message = request['operation'] + ', ' + str(changedTract) + ', ' + str(selected_tracts) 
+    
+    log_event_args = {
+        'logGroupName':'LikelyHoods',
+        'logStreamName':log_stream,
+        'logEvents':[
+            {
+                'timestamp':int(time.time()*1000),
+                'message':log_message
+            },
+        ],
+    }
+
+    if log_sequence_token:
+        log_event_args['sequenceToken'] = log_sequence_token
+    response = logging_client.put_log_events(**log_event_args)
+    print(response)
+    log_sequence_token=response['nextSequenceToken']
+    
+def find_or_create_logstream():
+    global logging_week
+    today = datetime.date.today()
+    beginning_of_week = today - datetime.timedelta(today.weekday());
+    if beginning_of_week != logging_week:
+        logging_week = beginning_of_week
+        logging_client.create_log_stream(logGroupName='LikelyHoods', logStreamName=logging_week.strftime('%m/%d/%Y'))
+    return logging_week.strftime('%m/%d/%Y')
 
 def create_mocked_response():
     info_list = []
