@@ -44,7 +44,8 @@ WELLNESS_INDEX = 3
 @cross_origin()
 def hello_world():
     if has_ranking:
-        selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in process_request(request.json)]
+        log_request(request.json)
+        selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json['markers']]
         selected_tracts = list(filter(None.__ne__, selected_tracts))
         print('\t'.join(map(str, [datetime.datetime.utcnow(),
                                   request.remote_addr,
@@ -61,17 +62,15 @@ def hello_world():
     else:
         return jsonify(create_mocked_response())
 
-def process_request(request):
-    tracts = request['oldMarkers']
+def log_request(request):
+    tracts = request['markers']
     changedMarker = request['changedMarker']
     if request['operation'] == "add":
-        tracts.append(changedMarker)
+        print('Add request logged')
     elif request['operation'] == "remove":
-        tracts = [tract for tract in tracts if tract['lat'] != changedMarker['lat'] and tract['lng'] != changedMarker['lng']]
+        print('Remove request logged')
     else:
-        raise AssertionError('Request operation invalid, should be add or remove')
-    print(tracts)
-    return tracts
+        print('Unknown request logged, expected add or remove')
 
 def create_mocked_response():
     info_list = []
