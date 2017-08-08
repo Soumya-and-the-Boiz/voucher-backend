@@ -28,18 +28,20 @@ NUMBER_OF_RESULTS = 5
 with open('src/config.json', 'r') as fp :
     config = json.load(fp)
 
-logging_client = boto3.client('logs', region_name='us-west-2', aws_access_key_id=config['CLOUDWATCHACCESS'], aws_secret_access_key=config['CLOUDWATCHSECRET'])
+# Can only run cloudwatch logging in prod
+if config['PROD']:
+    logging_client = boto3.client('logs', region_name='us-west-2', aws_access_key_id=config['CLOUDWATCHACCESS'], aws_secret_access_key=config['CLOUDWATCHSECRET'])
 
-today = datetime.date.today()
-logging_week = today - datetime.timedelta(today.weekday());
-log_stream_info = logging_client.describe_log_streams(logGroupName='LikelyHoods', logStreamNamePrefix=logging_week.strftime('%m/%d/%Y'))['logStreams']
-log_sequence_token = None
+    today = datetime.date.today()
+    logging_week = today - datetime.timedelta(today.weekday());
+    log_stream_info = logging_client.describe_log_streams(logGroupName='LikelyHoods', logStreamNamePrefix=logging_week.strftime('%m/%d/%Y'))['logStreams']
+    log_sequence_token = None
 
-if not log_stream_info:
-    logging_client.create_log_stream(logGroupName='LikelyHoods', logStreamName=logging_week.strftime('%m/%d/%Y'))
-else:
-    if 'uploadSequenceToken' in log_stream_info[0]:
-        log_sequence_token = log_stream_info[0]['uploadSequenceToken']
+    if not log_stream_info:
+        logging_client.create_log_stream(logGroupName='LikelyHoods', logStreamName=logging_week.strftime('%m/%d/%Y'))
+    else:
+        if 'uploadSequenceToken' in log_stream_info[0]:
+            log_sequence_token = log_stream_info[0]['uploadSequenceToken']
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -56,7 +58,8 @@ def hello_world():
     if has_ranking:
         selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json['markers']]
         selected_tracts = list(filter(None.__ne__, selected_tracts))
-        log_request(request.json, selected_tracts)
+        if config['PROD']:
+            log_request(request.json, selected_tracts)
         print('\t'.join(map(str, [datetime.datetime.utcnow(),
                                   request.remote_addr,
                                   selected_tracts
