@@ -1,6 +1,7 @@
 from itertools import islice
 import pandas as pd
 import os
+import json
 
 import datetime
 
@@ -30,6 +31,9 @@ NUMBER_OF_RESULTS = 5
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+with open('src/config.json', 'r') as fp :
+    config = json.load(fp)
 
 CONNECTIVITY_INDEX = 0
 EDUCATION_INDEX = 1

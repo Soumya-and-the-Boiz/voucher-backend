@@ -97,3 +97,6 @@ ENV/
 
 # Log Files
 backend.log.*
+
+# Config
+config.json
