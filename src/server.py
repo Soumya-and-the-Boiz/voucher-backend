@@ -55,6 +55,7 @@ WELLNESS_INDEX = 3
 @app.route('/', methods=['POST'])
 @cross_origin()
 def hello_world():
+
     if has_ranking:
         selected_tracts = [get_tract(float(item['lat']), float(item['lng'])) for item in request.json['markers']]
         selected_tracts = list(filter(None.__ne__, selected_tracts))
@@ -66,7 +67,12 @@ def hello_world():
                                  ])))
         if selected_tracts:
             filter_func = lambda tract: not tract in selected_tracts
-            predicted_tracts = predict(selected_tracts)
+            if request.json['rankingMethod'] == 'cmha':
+                predicted_tracts = predict(selected_tracts)
+            elif request.json['rankingMethod'] == 'autoencoder':
+                predicted_tracts = predict_autoencoder(selected_tracts)
+            else:
+                predicted_tracts = []
             max_results_needed = NUMBER_OF_RESULTS + len(selected_tracts)
             candidates = list(islice(filter(filter_func, predicted_tracts[:max_results_needed]), NUMBER_OF_RESULTS))
             return jsonify(create_response(candidates))
@@ -80,8 +86,8 @@ def log_request(request, selected_tracts):
     log_stream = find_or_create_logstream()
     tracts = request['markers']
     changedTract = get_tract(float(request['changedMarker']['lat']), float(request['changedMarker']['lng']))
-    log_message = request['operation'] + ', ' + str(changedTract) + ', ' + str(selected_tracts) 
-    
+    log_message = request['operation'] + ', ' + str(changedTract) + ', ' + str(selected_tracts)
+
     log_event_args = {
         'logGroupName':'LikelyHoods',
         'logStreamName':log_stream,
@@ -98,7 +104,7 @@ def log_request(request, selected_tracts):
     response = logging_client.put_log_events(**log_event_args)
     print(response)
     log_sequence_token=response['nextSequenceToken']
-    
+
 def find_or_create_logstream():
     global logging_week
     today = datetime.date.today()
