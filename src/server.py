@@ -107,9 +107,11 @@ def log_request(request, selected_tracts):
 
 def find_or_create_logstream():
     global logging_week
+    global log_sequence_token
     today = datetime.date.today()
     beginning_of_week = today - datetime.timedelta(today.weekday());
     if beginning_of_week != logging_week:
+        log_sequence_token = None
         logging_week = beginning_of_week
         logging_client.create_log_stream(logGroupName='LikelyHoods', logStreamName=logging_week.strftime('%m/%d/%Y'))
     return logging_week.strftime('%m/%d/%Y')
